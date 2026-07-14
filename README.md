@@ -1,4 +1,4 @@
-# Rethinking Underwater Video Enhancement from an Illumination Perspective
+# A Physics-Guided Framework for Underwater Video Enhancement in Aquaculture Environments
 
 This repository provides supplementary information for our work on **underwater video enhancement**.
 
