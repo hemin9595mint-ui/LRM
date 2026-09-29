@@ -1,191 +1,188 @@
 # A Physics-Guided Framework for Underwater Video Enhancement in Aquaculture Environments
 
-This repository provides supplementary information for our work on **underwater video enhancement**.
+This repository provides the dataset resources, evaluation utilities, reproducibility information, and supplementary materials for our work on **physics-guided weakly supervised underwater video enhancement for aquaculture environments**.
 
-The purpose of this page is to introduce the motivation behind our research, provide information about the collected underwater video dataset (**IWUV**), and release the revised evaluation metric implementations used in our experiments.
+## 1. IWUV Dataset
 
----
+We introduce the **Inland Water Underwater Video (IWUV) dataset**, which was collected in real aquaculture environments and contains diverse underwater degradations, including turbidity, non-uniform illumination, color distortion, suspended-particle interference, occlusion, and dynamic scene changes.
 
-# Motivation
+### Dataset protocol
 
-Before exploring underwater video enhancement, our research mainly focused on low-light image enhancement.
+The IWUV data are partitioned at the **source-video level before sequence construction** to avoid overlap between model-development and evaluation subsets.
 
-During this process, we encountered a fundamental question:
+- Each input sequence contains **5 consecutive frames**.
+- A total of **1,315 five-frame sequences** are used for sequence-level experiments:
+  - **1,060 training sequences**
+  - **150 validation sequences**
+  - **105 sequence-level test sequences**
+- The source videos used to construct the training, validation, and sequence-level test subsets are mutually exclusive.
+- An additional **114 complete videos** from different acquisition sites and recording periods are reserved for **independent held-out video-level evaluation**.
+- Frames from these 114 held-out videos are not used for training, validation, checkpoint selection, or hyperparameter tuning.
 
-> When an image appears degraded, is the visual information truly lost during image acquisition, or is it only hidden by unfavorable illumination conditions?
+## 2. Dataset Download
 
-This question motivated us to rethink image degradation from a different perspective.
+### IWUV dataset package — Google Drive
 
-Low-light images and underwater images have different degradation mechanisms, but they share several visual characteristics:
+The released IWUV dataset package is available at:
 
-- insufficient illumination;
-- reduced contrast;
-- color distortion;
-- invisible or degraded details.
+**Google Drive:**  
+https://drive.google.com/drive/folders/1KNclntJYwPm4SKDm6jheOOVMnkB8PWWZ?usp=sharing
 
-From a visual perspective, both types of images suffer from the same phenomenon:
+### Complete video resources — Baidu Netdisk
 
-**The captured image fails to reveal the complete information of the real scene.**
+The complete underwater video resources are available at:
 
----
-
-# From Haze Removal to Underwater Enhancement
-
-Underwater images and hazy images exhibit remarkable visual similarities.
-
-Both suffer from:
-
-- light scattering;
-- contrast attenuation;
-- information degradation;
-- color distortion.
-
-<p align="center">
-<img src="./figures/1.png" width="850">
-</p>
-
-Inspired by classical atmospheric scattering models used in image dehazing, we initially investigated whether haze removal theories could be extended to underwater environments.
-
-However, underwater imaging is more complicated due to:
-
-- wavelength-dependent light attenuation;
-- scattering effects;
-- unknown transmission information;
-- complex underwater illumination.
-
-Most of these physical parameters are difficult to accurately estimate from a single image.
-
-Therefore, instead of explicitly estimating complex physical parameters, we explored underwater degradation from an image decomposition perspective.
-
----
-
-# Illumination Perspective
-
-Inspired by Retinex theory in low-light enhancement:
-
-\[
-S = R \times I
-\]
-
-where:
-
-- \(S\) represents the observed image;
-- \(R\) represents intrinsic scene reflectance information;
-- \(I\) represents illumination information.
-
-We hypothesize that part of underwater degradation can be interpreted as illumination-related degradation.
-
-From this perspective, an underwater image contains:
-
-- intrinsic scene information;
-- degradation-related illumination effects.
-
-This viewpoint provides a new way to analyze underwater degradation without requiring inaccessible physical parameters.
-
----
-
-# Why Underwater Video Enhancement?
-
-Compared with single-image enhancement, underwater video enhancement introduces additional challenges.
-
-A video consists of continuous frames:
-
-```
-Frame t-1  →  Frame t  →  Frame t+1
-```
-
-A successful underwater video enhancement method should not only improve the visual quality of each individual frame, but also maintain:
-
-- color consistency between adjacent frames;
-- temporal coherence;
-- reduced flickering artifacts.
-
-Therefore, underwater video enhancement requires both spatial quality improvement and temporal stability.
-
----
-
-# IWUV Dataset
-
-To investigate real-world underwater degradation, we collected an underwater video dataset:
-
-## IWUV
-**Illumination-aware UnderWater Video Dataset**
-
-The dataset was collected from real underwater environments and contains diverse underwater video sequences with different:
-
-- illumination conditions;
-- water clarity;
-- color degradation levels;
-- imaging environments.
-
-The collected videos were processed into continuous frame sequences for underwater video enhancement research.
-
----
-
-# Dataset Availability
-
-The collected IWUV underwater videos are available through the following link:
-
-**Baidu Netdisk**
-
-```
-Link:
+**Baidu Netdisk:**  
 https://pan.baidu.com/s/1aDUMFCk1-qVB29uUQ8QeGg
 
-Password:
-1234
+**Password:** `1234`
+
+If one download service is temporarily unavailable, please try the alternative source or open an issue in this repository.
+
+## 3. Training and Evaluation Protocol
+
+The proposed model is trained using IWUV training sequences together with an independent **unpaired clean-domain reference set**.
+
+- **840 high-quality UIEB reference images** are used only for unpaired clean-domain guidance.
+- **475 clean LOL images** are additionally used as clean-domain references.
+- These clean-domain images are not paired with IWUV sequences.
+- The remaining **50 UIEB image pairs** are reserved exclusively for full-reference evaluation.
+- The **UIEB Challenging-60** images are used only for no-reference evaluation.
+- MVK is used for cross-dataset video evaluation without adaptation.
+- DeepFish is used for zero-shot downstream fish-detection evaluation without enhancement-model fine-tuning.
+
+No clean reference images are required during inference.
+
+## 4. Software Environment
+
+The main experimental environment is:
+
+- **OS:** Ubuntu 22.04
+- **Python:** 3.12
+- **PyTorch:** 2.8.0
+- **CUDA:** 12.8
+- **GPU:** NVIDIA Tesla V100, 32 GB
+
+The exact software dependencies and package versions required for reproduction should be installed from:
+
+```bash
+pip install -r requirements.txt
 ```
 
-The provided videos are intended for research reference.
+> **Before final resubmission:** ensure that `requirements.txt` is included in the repository and records the exact versions used in the experiments.
 
----
+## 5. Main Training Settings
 
-# Evaluation Metric Revision
+The main training settings reported in the manuscript are:
 
-During the revision process, we carefully re-examined our experimental evaluation pipeline.
+- Input sequence length: **5 frames**
+- Crop size: **256 × 256**
+- Batch size: **8**
+- Optimizer: **Adam**
+- Initial learning rate: **2 × 10^-4**
+- Training epochs: **200**
+- Random seeds: **4, 42, 123, 3407, 2024**
+- Model selection: best checkpoint on the validation set
+- Reported results for our model: mean ± standard deviation across five independent runs
 
-We found that some previous evaluation metric implementations contained inconsistencies.
+### Loss weights
 
-Therefore, we provide:
+| Hyperparameter | Final value |
+|---|---:|
+| `lambda_deg` | 1.0 |
+| `lambda_cdg` | 1.0 |
+| `lambda_A` | 0.01 |
+| `lambda_N` | 0.01 |
+| `lambda_temp` | 0.01 |
+| `lambda_adv` | 0.01 |
+| `lambda_col` | 1.0 |
+| `lambda_sty` | 0.01 |
+| `lambda_str` | 0.1 |
 
-- previous evaluation metric implementations;
-- corrected evaluation metric implementations;
-- scripts for recalculating evaluation results.
+The final hyperparameter configuration was selected using the **validation set only**, considering both enhancement quality and temporal consistency. The test sets were not used for hyperparameter tuning or checkpoint selection.
 
-The revised evaluation metrics include:
+> **Reviewer-requested reproducibility record:** before final resubmission, add the actual **candidate values/ranges considered** and the **number of validation trials/configurations** here (or in a dedicated `HYPERPARAMETERS.md` file). These values should reflect the experiments that were actually performed.
 
-- UCIQE;
-- UIQM;
-- UICM;
-- UISM;
-- UIConM.
+## 6. Evaluation Metrics and Scripts
 
-We hope this update improves the reliability and reproducibility of underwater enhancement evaluation.
+During revision, we re-examined the evaluation pipeline and provide corrected implementations for the underwater no-reference image-quality metrics used in the experiments.
 
----
+The corrected evaluation utilities include:
 
-# Code and Dataset Availability
+- UCIQE
+- UIQM
+- UICM
+- UISM
+- UIConM
 
-At the current stage, we provide:
+The corrected implementations are provided in:
 
-- IWUV underwater video samples;
-- revised evaluation metric implementations.
+```text
+right-Underwater-image-evaluation-metrics/
+```
 
-Due to ongoing research, code organization, and dataset refinement, the complete training code and official version of the dataset will be publicly released after paper acceptance.
+The file:
 
-For research collaboration or reasonable requests, please contact the authors.
+```text
+underwater_metrics_ERROR.py
+```
 
----
+is retained only to document the previous implementation and should **not** be used to reproduce the final reported results.
 
-# Citation
+### Basic evaluation workflow
 
-If you find this work useful, please consider citing our paper.
+1. Install the required environment using `requirements.txt`.
+2. Prepare enhanced images in a separate output directory while preserving consistent file naming.
+3. Use the corrected scripts under `right-Underwater-image-evaluation-metrics/`.
+4. Apply the same preprocessing and metric implementation to all compared methods.
+5. Report the average metric values over the corresponding evaluation set.
+
+For paired UIEB evaluation, PSNR, SSIM, and LPIPS are computed between enhanced images and their aligned reference images. For video evaluation, the manuscript additionally reports VSFA, FastVQA, DOVER, and warping error (WE) using the corresponding official implementations/settings described in the paper.
+
+## 7. Repository Checklist for Reproducibility
+
+Before final paper resubmission, the repository should provide public and stable access to the following items:
+
+- [x] Public IWUV dataset download link
+- [x] Complete video-resource download link
+- [x] Corrected underwater evaluation metric implementations
+- [ ] `requirements.txt` with exact dependency versions
+- [ ] Training/inference code, if released with the revision
+- [ ] Evaluation instructions for all released scripts
+- [ ] Hyperparameter candidate ranges and number of validation trials
+- [ ] Final directory/file organization documented in this README
+
+This checklist is included to make the released resources easy to verify and reproduce.
+
+## 8. Suggested Dataset Organization
+
+A recommended local organization is:
+
+```text
+IWUV/
+├── train/
+├── val/
+├── sequence_test/
+└── heldout_video_test/
+```
+
+Please keep the provided split organization unchanged when reproducing the reported experiments so that source-video separation is preserved.
+
+## 9. Citation
+
+If you use the IWUV dataset, evaluation utilities, or this work in your research, please cite the corresponding paper.
 
 ```bibtex
 @article{xxx,
-  title={xxx},
-  author={xxx},
-  journal={xxx},
-  year={2026}
+  title   = {A Physics-Guided Framework for Underwater Video Enhancement in Aquaculture Environments},
+  author  = {Min He and Dongfang Li and Tieli Lyu and Zhiyuan Chen and Zhu Liu and Jie Hu and Maohua Xiao},
+  journal = {Pattern Recognition},
+  year    = {2026}
 }
 ```
+
+> Please replace the BibTeX entry with the final publication information once available.
+
+## 10. Contact
+
+For questions about the IWUV dataset, evaluation scripts, or reproducibility materials, please open an issue in this repository or contact the corresponding author.
