@@ -2,9 +2,9 @@
 
 This repository provides the dataset resources, evaluation utilities, reproducibility information, and supplementary materials for our work on **physics-guided weakly supervised underwater video enhancement for aquaculture environments**.
 
-## 1. IWUV Dataset
+## IWUV Dataset
 
-We introduce the **Inland Water Underwater Video (IWUV) dataset**, which was collected in real aquaculture environments and contains diverse underwater degradations, including turbidity, non-uniform illumination, color distortion, suspended-particle interference, occlusion, and dynamic scene changes.
+We introduce the **Inland Water Underwater Video (IWUV) dataset**, collected in real aquaculture environments with diverse underwater degradations, including turbidity, non-uniform illumination, color distortion, suspended-particle interference, occlusion, and dynamic scene changes.
 
 ### Dataset protocol
 
@@ -19,33 +19,25 @@ The IWUV data are partitioned at the **source-video level before sequence constr
 - An additional **114 complete videos** from different acquisition sites and recording periods are reserved for **independent held-out video-level evaluation**.
 - Frames from these 114 held-out videos are not used for training, validation, checkpoint selection, or hyperparameter tuning.
 
-## 2. Dataset Download
+## Dataset Download
 
 ### IWUV dataset package — Google Drive
 
-The released IWUV dataset package is available at:
-
-**Google Drive:**  
 https://drive.google.com/drive/folders/1KNclntJYwPm4SKDm6jheOOVMnkB8PWWZ?usp=sharing
 
 ### Complete video resources — Baidu Netdisk
 
-The complete underwater video resources are available at:
-
-**Baidu Netdisk:**  
 https://pan.baidu.com/s/1aDUMFCk1-qVB29uUQ8QeGg
 
-**Password:** `1234`
+Password: `1234`
 
-If one download service is temporarily unavailable, please try the alternative source or open an issue in this repository.
-
-## 3. Training and Evaluation Protocol
+## Training and Evaluation Protocol
 
 The proposed model is trained using IWUV training sequences together with an independent **unpaired clean-domain reference set**.
 
 - **840 high-quality UIEB reference images** are used only for unpaired clean-domain guidance.
 - **475 clean LOL images** are additionally used as clean-domain references.
-- These clean-domain images are not paired with IWUV sequences.
+- The clean-domain images are not paired with IWUV sequences.
 - The remaining **50 UIEB image pairs** are reserved exclusively for full-reference evaluation.
 - The **UIEB Challenging-60** images are used only for no-reference evaluation.
 - MVK is used for cross-dataset video evaluation without adaptation.
@@ -53,7 +45,7 @@ The proposed model is trained using IWUV training sequences together with an ind
 
 No clean reference images are required during inference.
 
-## 4. Software Environment
+## Software Environment
 
 The main experimental environment is:
 
@@ -63,17 +55,13 @@ The main experimental environment is:
 - **CUDA:** 12.8
 - **GPU:** NVIDIA Tesla V100, 32 GB
 
-The exact software dependencies and package versions required for reproduction should be installed from:
+Install the exact software dependencies from the released environment file:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> **Before final resubmission:** ensure that `requirements.txt` is included in the repository and records the exact versions used in the experiments.
-
-## 5. Main Training Settings
-
-The main training settings reported in the manuscript are:
+## Main Training Settings
 
 - Input sequence length: **5 frames**
 - Crop size: **256 × 256**
@@ -85,7 +73,7 @@ The main training settings reported in the manuscript are:
 - Model selection: best checkpoint on the validation set
 - Reported results for our model: mean ± standard deviation across five independent runs
 
-### Loss weights
+### Final loss weights
 
 | Hyperparameter | Final value |
 |---|---:|
@@ -99,15 +87,13 @@ The main training settings reported in the manuscript are:
 | `lambda_sty` | 0.01 |
 | `lambda_str` | 0.1 |
 
-The final hyperparameter configuration was selected using the **validation set only**, considering both enhancement quality and temporal consistency. The test sets were not used for hyperparameter tuning or checkpoint selection.
+The final hyperparameter configuration was selected using the **validation set only**, considering both frame-level enhancement quality and temporal consistency. The test sets were not used for hyperparameter tuning or checkpoint selection.
 
-> **Reviewer-requested reproducibility record:** before final resubmission, add the actual **candidate values/ranges considered** and the **number of validation trials/configurations** here (or in a dedicated `HYPERPARAMETERS.md` file). These values should reflect the experiments that were actually performed.
+Detailed candidate ranges, validation trials, and the final selection record are provided in `HYPERPARAMETERS.md`.
 
-## 6. Evaluation Metrics and Scripts
+## Evaluation Metrics and Scripts
 
-During revision, we re-examined the evaluation pipeline and provide corrected implementations for the underwater no-reference image-quality metrics used in the experiments.
-
-The corrected evaluation utilities include:
+The repository provides corrected implementations for the underwater no-reference image-quality metrics used in the experiments:
 
 - UCIQE
 - UIQM
@@ -127,7 +113,7 @@ The file:
 underwater_metrics_ERROR.py
 ```
 
-is retained only to document the previous implementation and should **not** be used to reproduce the final reported results.
+is retained only for documenting the previous implementation and should **not** be used to reproduce the final reported results.
 
 ### Basic evaluation workflow
 
@@ -139,24 +125,7 @@ is retained only to document the previous implementation and should **not** be u
 
 For paired UIEB evaluation, PSNR, SSIM, and LPIPS are computed between enhanced images and their aligned reference images. For video evaluation, the manuscript additionally reports VSFA, FastVQA, DOVER, and warping error (WE) using the corresponding official implementations/settings described in the paper.
 
-## 7. Repository Checklist for Reproducibility
-
-Before final paper resubmission, the repository should provide public and stable access to the following items:
-
-- [x] Public IWUV dataset download link
-- [x] Complete video-resource download link
-- [x] Corrected underwater evaluation metric implementations
-- [ ] `requirements.txt` with exact dependency versions
-- [ ] Training/inference code, if released with the revision
-- [ ] Evaluation instructions for all released scripts
-- [ ] Hyperparameter candidate ranges and number of validation trials
-- [ ] Final directory/file organization documented in this README
-
-This checklist is included to make the released resources easy to verify and reproduce.
-
-## 8. Suggested Dataset Organization
-
-A recommended local organization is:
+## Suggested Dataset Organization
 
 ```text
 IWUV/
@@ -168,7 +137,18 @@ IWUV/
 
 Please keep the provided split organization unchanged when reproducing the reported experiments so that source-video separation is preserved.
 
-## 9. Citation
+## Reproducibility Resources
+
+The repository provides:
+
+- IWUV dataset download links
+- complete underwater video resources
+- corrected evaluation metric implementations
+- exact software dependencies in `requirements.txt`
+- hyperparameter-selection record in `HYPERPARAMETERS.md`
+- usage and evaluation instructions in this README
+
+## Citation
 
 If you use the IWUV dataset, evaluation utilities, or this work in your research, please cite the corresponding paper.
 
@@ -181,8 +161,8 @@ If you use the IWUV dataset, evaluation utilities, or this work in your research
 }
 ```
 
-> Please replace the BibTeX entry with the final publication information once available.
+Please replace the BibTeX entry with the final publication information once available.
 
-## 10. Contact
+## Contact
 
 For questions about the IWUV dataset, evaluation scripts, or reproducibility materials, please open an issue in this repository or contact the corresponding author.
